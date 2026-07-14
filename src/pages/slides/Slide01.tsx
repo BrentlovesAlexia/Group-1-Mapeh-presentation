@@ -12,7 +12,7 @@ export default function Slide01() {
         </h1>
 
         <p className="slide-sub">
-          Five professional paths in art, music, media, and design — explored by Group 1.
+          Five professional paths in art, music, media, and design — explored by Group 2.
         </p>
 
         {/* Illustration: creative industry collage — monitor, music note, game controller, brush, clapperboard */}
