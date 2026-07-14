@@ -1,17 +1,3 @@
-/**
- * Platform contract file — do not restructure.
- *
- * This file is part of the contract between the slides artifact and
- * the surrounding workspace tooling (preview, thumbnails, exports).
- * Reorganizing it, swapping the router, or changing the structure
- * of `AllSlides` can quietly break that tooling even when the page
- * still looks correct in the preview.
- *
- * Agents: see the slides skill `<workspace_contract>` for the full
- * rules, and `references/visual_qa.md` → "Platform contract sanity
- * check" if this file has been hand-edited and needs repair.
- */
-
 import { useEffect, useRef, useState } from 'react';
 import { slides } from '@/slideLoader';
 import { useLocation } from 'wouter';
@@ -156,6 +142,20 @@ function SlideViewer() {
 export default function App() {
   const [location, navigate] = useLocation();
 
+  // Watch for slide changes and play the transition fart noise!
+  useEffect(() => {
+    // Avoid playing immediately on initial render or list views
+    if (location !== '/' && location !== '/allslides') {
+      const audio = new Audio(`${import.meta.env.BASE_URL}fart.mp3`);
+      audio.volume = 0.55; // Adjust the volume (0.0 to 1.0)
+      
+      audio.play().catch((err) => {
+        // Log in console if the browser blocks play before interaction
+        console.warn("Fart audio was blocked or the file isn't in /public folder:", err);
+      });
+    }
+  }, [location]);
+
   useEffect(() => {
     // Log for mobile debugging
     console.log("App Location Checked:", location);
@@ -197,4 +197,4 @@ export default function App() {
   if (location === '/') return <SlideViewer />;
   if (location === '/allslides') return <AllSlides />;
   return <SlideEditor />;
-          }
+}
