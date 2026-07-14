@@ -1,0 +1,93 @@
+# .github/workflows/deploy.yml
+#
+# ⚠️  One-time setup before pushing:
+#   1. In your repo → Settings → Pages → Source: set to "GitHub Actions"
+#   2. Replace every "catalog:" in package.json with a real version number
+#      (the project was built inside a pnpm workspace — catalog: won't
+#       resolve in a standalone repo). Real versions to use:
+#
+#         "react": "^19.1.0"
+#         "react-dom": "^19.1.0"
+#         "@vitejs/plugin-react": "^4.5.2"
+#         "vite": "^7.3.6"
+#         "tailwindcss": "^4.1.11"
+#         "@tailwindcss/vite": "^4.1.11"
+#         "wouter": "^3.7.1"
+#         "zod": "^3.25.67"
+#         "tsx": "^4.20.3"
+#         "@types/react": "^19.1.8"
+#         "@types/react-dom": "^19.1.6"
+#         "@types/node": "^22.15.32"
+#         "@replit/vite-plugin-runtime-error-modal": "^0.0.3"
+#         "@replit/vite-plugin-cartographer": "^0.2.7"
+#         "@replit/vite-plugin-dev-banner": "^0.0.4"
+#
+#   3. Set BASE_PATH below:
+#      - User/org page  (username.github.io):          BASE_PATH: /
+#      - Project page   (username.github.io/my-repo):  BASE_PATH: /my-repo/
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  BASE_PATH: /creative-careers/   # ← change this to match your repo name
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+        env:
+          PORT: 3000          # required by vite.config.ts (value unused at build time)
+          BASE_PATH: ${{ env.BASE_PATH }}
+          NODE_ENV: production
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
