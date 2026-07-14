@@ -1,9 +1,6 @@
 import React from 'react';
 
 export default function Slide08() {
-  // Automatically prefixes the correct sub-folder path when deployed to GitHub Pages!
-  const imageSrc = `${import.meta.env.BASE_URL}makeup-artist.png`;
-
   return (
     <div className="slide-paper">
       <div className="slide-layout-def">
@@ -26,7 +23,7 @@ export default function Slide08() {
         <div className="slide-illo-col">
           <div className="slide-illustration" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             <img 
-              src={imageSrc} 
+              src="makeup-artist.png" 
               alt="Makeup Artist" 
               style={{ 
                 maxWidth: '90%', 
