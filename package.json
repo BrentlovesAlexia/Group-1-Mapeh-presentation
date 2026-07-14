@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "^2.0.0",
-    "@replit/vite-plugin-dev-banner": "^0.0.3",
+    "@replit/vite-plugin-dev-banner": "^0.1.2",
     "@replit/vite-plugin-runtime-error-modal": "^1.1.0",
     "@tailwindcss/vite": "^4.0.0",
     "@types/node": "^20.11.0",
