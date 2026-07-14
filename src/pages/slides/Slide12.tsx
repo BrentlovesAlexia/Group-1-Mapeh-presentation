@@ -81,7 +81,7 @@ export default function Slide12() {
             <br /><br />
             We hope you gained valuable insights into these creative paths. 
             <br />
-            <strong>Coded this so this counts as effort, right? -brent</strong>
+            <strong>Gaiz, napuyat akooo dito🥲</strong>
           </p>
         </div>
       </div>
