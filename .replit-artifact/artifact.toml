@@ -1,0 +1,27 @@
+kind = "slides"
+previewPath = "/creative-careers/"
+title = "Creative Industry Careers"
+version = "1.0.0"
+id = "artifacts/creative-careers"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/creative-careers/" ]
+localPort = 19113
+
+[services.development]
+run = "pnpm --filter @workspace/creative-careers run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/creative-careers", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/creative-careers/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19113"
+BASE_PATH = "/creative-careers/"
