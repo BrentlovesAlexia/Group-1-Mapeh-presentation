@@ -81,7 +81,7 @@ export default function Slide12() {
             <br /><br />
             We hope you gained valuable insights into these creative paths. 
             <br />
-            <strong>Feel free to ask any questions!</strong>
+            <strong>Coded this so this counts as effort, right? -brent</strong>
           </p>
         </div>
       </div>
