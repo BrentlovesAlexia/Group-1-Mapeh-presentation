@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Slide01() {
   return (
-    <div className="slide-paper">
+    <div className="slide-paper" style={{ position: 'relative', overflow: 'hidden' }}>
       <div className="slide-layout-title">
         <span className="slide-eyebrow">Group 1 · G10 Quezon · 2026</span>
 
@@ -13,15 +13,26 @@ export default function Slide01() {
           Industries
         </h1>
 
-        <p className="slide-sub">
+        <p className="slide-sub" style={{ maxWidth: '55%' }}>
           Five professional paths in art, music, media, and design — explored by Group 1.
         </p>
 
-        {/* Scaled-down SVG illustration to prevent offsetting the text */}
-        <div className="slide-illustration slide-title-illo">
+        {/* Absolutely positioned container so it NEVER pushes or offsets your text */}
+        <div 
+          className="slide-illustration slide-title-illo" 
+          style={{ 
+            position: 'absolute', 
+            right: '20px', 
+            bottom: '40px', 
+            width: '380px', 
+            height: '280px',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }}
+        >
           <svg viewBox="0 0 420 300" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'url(#sk)', width: '100%', height: '100%' }}>
             {/* Monitor with design grid */}
-            <g transform="translate(40, 60)">
+            <g transform="translate(20, 40)">
               <rect x="60" y="90" width="130" height="90" rx="7" fill="#2e2e3e" stroke="#1a1a1a" strokeWidth="2.2" />
               <rect x="70" y="99" width="110" height="68" rx="3" fill="#e4f0ff" />
               {/* Grid on monitor */}
@@ -38,7 +49,7 @@ export default function Slide01() {
             </g>
 
             {/* Pencil / pen */}
-            <g transform="translate(40, 20) rotate(-15 280 200)">
+            <g transform="translate(10, 0) rotate(-15 280 200)">
               <rect x="264" y="78" width="22" height="160" rx="3" fill="#fde9a0" stroke="#1a1a1a" strokeWidth="2" />
               <polygon points="264,238 286,238 275,275" fill="#f4c84a" stroke="#1a1a1a" strokeWidth="2" />
               <polygon points="268,268 282,268 275,288" fill="#f9aa8a" stroke="#1a1a1a" strokeWidth="2" />
@@ -47,13 +58,13 @@ export default function Slide01() {
             </g>
 
             {/* Makeup brush */}
-            <g transform="translate(30, 20) rotate(25 330 130)">
+            <g transform="translate(10, 0) rotate(25 330 130)">
               <rect x="318" y="42" width="12" height="120" rx="3" fill="#c09070" stroke="#1a1a1a" strokeWidth="1.8" />
               <ellipse cx="324" cy="42" rx="10" ry="22" fill="#e8a0a0" stroke="#1a1a1a" strokeWidth="1.8" />
               <polygon points="318,162 330,162 325,185" fill="#fae8c8" stroke="#1a1a1a" strokeWidth="1.8" />
             </g>
 
-            {/* Sparkles and details repositioned */}
+            {/* Sparkles */}
             <g stroke="#d64a00" strokeWidth="2" strokeLinecap="round">
               <line x1="242" y1="128" x2="242" y2="140" /><line x1="236" y1="134" x2="248" y2="134" />
             </g>
@@ -72,4 +83,4 @@ export default function Slide01() {
       <div className="slide-footer">01 / 12</div>
     </div>
   );
-}
+              }
