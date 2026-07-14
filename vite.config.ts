@@ -49,10 +49,7 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    // If on GitHub Actions, build directly to 'dist' so GitHub Pages can find it easily
-    outDir: isGitHubActions 
-      ? path.resolve(import.meta.dirname, 'dist') 
-      : path.resolve(import.meta.dirname, 'dist/public'),
+    outDir: path.resolve(import.meta.dirname, 'dist/public'),
     emptyOutDir: true,
   },
   server: {
