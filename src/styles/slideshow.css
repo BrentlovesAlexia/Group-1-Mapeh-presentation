@@ -1,122 +1,213 @@
-import { useEffect, useState, useRef } from 'react';
-import { useLocation } from 'wouter';
-import { slides } from '@/slideLoader';
+/* ═══════════════════════════════════════════
+   CORE SLIDE WRAPPERS & STAGE
+═══════════════════════════════════════════ */
+.ss-stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f4efe6; /* Warm paper texture background */
+  perspective: 1200px;       /* Enable 3D depth */
+}
 
-// Define our pool of transition preset classes
-const TRANSITION_PRESETS = [
-  '',        // Default: Horizontal Slide-in (no extra class)
-  'ss-fade', // Preset 1: Elegant Fade & Zoom
-  'ss-up',   // Preset 2: Vertical Sweep
-  'ss-flip'  // Preset 3: 3D Card Flip
-];
+.ss-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
 
-export default function SlideShow() {
-  const [location, navigate] = useLocation();
-  
-  // Track current, previous, and direction of slide progression
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [prevIdx, setPrevIdx] = useState(-1);
-  const [direction, setDirection] = useState<'next' | 'prev'>('next');
-  
-  // Track the random transition class assigned to the current active slide
-  const [activeTransition, setActiveTransition] = useState('');
+/* Hidden State */
+.ss-gone {
+  display: none;
+  opacity: 0;
+}
 
-  // Find the slide index based on URL location (e.g. /slide1)
-  useEffect(() => {
-    const match = location.match(/^\/slide(\d+)$/);
-    const pos = match ? parseInt(match[1], 10) : 1;
-    const targetIdx = slides.findIndex(s => s.position === pos);
-    
-    if (targetIdx !== -1 && targetIdx !== currentIdx) {
-      setDirection(targetIdx > currentIdx ? 'next' : 'prev');
-      setPrevIdx(currentIdx);
-      setCurrentIdx(targetIdx);
+/* ═══════════════════════════════════════════
+   DEFAULT TRANSITION: HORIZONTAL SLIDE
+═══════════════════════════════════════════ */
+/* Slide is entering from the right (moving next) */
+.ss-slide.ss-enter-next {
+  animation: ssSlideInRight 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+/* Slide is entering from the left (moving prev) */
+.ss-slide.ss-enter-prev {
+  animation: ssSlideInLeft 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+/* Slide is leaving to the left (moving next) */
+.ss-slide.ss-exit-next {
+  animation: ssSlideOutLeft 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+/* Slide is leaving to the right (moving prev) */
+.ss-slide.ss-exit-prev {
+  animation: ssSlideOutRight 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-      // Randomly pick a transition style for this movement!
-      const randomPreset = TRANSITION_PRESETS[Math.floor(Math.random() * TRANSITION_PRESETS.length)];
-      setActiveTransition(randomPreset);
-    }
-  }, [location, currentIdx]);
+@keyframes ssSlideInRight {
+  0%   { transform: translateX(100%); opacity: 0; }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+@keyframes ssSlideInLeft {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  100% { transform: translateX(0);     opacity: 1; }
+}
+@keyframes ssSlideOutLeft {
+  0%   { transform: translateX(0);    opacity: 1; }
+  100% { transform: translateX(-100%); opacity: 0; }
+}
+@keyframes ssSlideOutRight {
+  0%   { transform: translateX(0);   opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
 
-  // Handle Keyboard Navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === ' ') {
-        if (currentIdx < slides.length - 1) {
-          navigate(`/slide${slides[currentIdx + 1].position}`);
-        }
-      }
-      if (e.key === 'ArrowLeft') {
-        if (currentIdx > 0) {
-          navigate(`/slide${slides[currentIdx - 1].position}`);
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIdx, navigate]);
+/* ═══════════════════════════════════════════
+   PRESET 1: FADE & ZOOM (ss-fade)
+═══════════════════════════════════════════ */
+.ss-slide.ss-fade {
+  transform-origin: center center;
+}
+.ss-slide.ss-fade.ss-enter-next,
+.ss-slide.ss-fade.ss-enter-prev {
+  animation: ssFadeZoomIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.ss-slide.ss-fade.ss-exit-next,
+.ss-slide.ss-fade.ss-exit-prev {
+  animation: ssFadeZoomOut 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-  const goNext = () => {
-    if (currentIdx < slides.length - 1) {
-      navigate(`/slide${slides[currentIdx + 1].position}`);
-    }
-  };
+@keyframes ssFadeZoomIn {
+  0%   { transform: scale(1.08); opacity: 0; filter: blur(4px); }
+  100% { transform: scale(1);    opacity: 1; filter: blur(0); }
+}
+@keyframes ssFadeZoomOut {
+  0%   { transform: scale(1);    opacity: 1; filter: blur(0); }
+  100% { transform: scale(0.92); opacity: 0; filter: blur(4px); }
+}
 
-  const goPrev = () => {
-    if (currentIdx > 0) {
-      navigate(`/slide${slides[currentIdx - 1].position}`);
-    }
-  };
+/* ═══════════════════════════════════════════
+   PRESET 2: VERTICAL SWEEP (ss-up)
+═══════════════════════════════════════════ */
+.ss-slide.ss-up.ss-enter-next {
+  animation: ssEnterFromBottom 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.ss-slide.ss-up.ss-enter-prev {
+  animation: ssEnterFromTop 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.ss-slide.ss-up.ss-exit-next {
+  animation: ssExitToTop 0.55s cubic-bezier(0.55, 0, 0.9, 0.4) forwards;
+}
+.ss-slide.ss-up.ss-exit-prev {
+  animation: ssExitToBottom 0.55s cubic-bezier(0.55, 0, 0.9, 0.4) forwards;
+}
 
-  return (
-    <div className="ss-stage">
-      {/* Slides Rendering */}
-      {slides.map((slide, idx) => {
-        let animClass = 'ss-gone'; // Hidden by default
+@keyframes ssEnterFromBottom {
+  0%   { transform: translateY(100%) scale(0.95); opacity: 0; }
+  100% { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+@keyframes ssEnterFromTop {
+  0%   { transform: translateY(-100%) scale(0.95); opacity: 0; }
+  100% { transform: translateY(0)     scale(1);    opacity: 1; }
+}
+@keyframes ssExitToTop {
+  0%   { transform: translateY(0);   opacity: 1; }
+  100% { transform: translateY(-30%) opacity: 0; }
+}
+@keyframes ssExitToBottom {
+  0%   { transform: translateY(0);  opacity: 1; }
+  100% { transform: translateY(30%) opacity: 0; }
+}
 
-        if (idx === currentIdx) {
-          // If this is the active slide entering
-          animClass = direction === 'next' 
-            ? `ss-enter-next ${activeTransition}` 
-            : `ss-enter-prev ${activeTransition}`;
-        } else if (idx === prevIdx) {
-          // If this is the previous slide exiting
-          animClass = direction === 'next' 
-            ? `ss-exit-next ${activeTransition}` 
-            : `ss-exit-prev ${activeTransition}`;
-        }
+/* ═══════════════════════════════════════════
+   PRESET 3: 3D CARD FLIP (ss-flip)
+═══════════════════════════════════════════ */
+.ss-slide.ss-flip {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+.ss-slide.ss-flip.ss-enter-next {
+  animation: ssFlipEnterRight 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+.ss-slide.ss-flip.ss-enter-prev {
+  animation: ssFlipEnterLeft 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+.ss-slide.ss-flip.ss-exit-next {
+  animation: ssFlipExitLeft 0.55s cubic-bezier(0.55, 0, 0.9, 0.4) forwards;
+}
+.ss-slide.ss-flip.ss-exit-prev {
+  animation: ssFlipExitRight 0.55s cubic-bezier(0.55, 0, 0.9, 0.4) forwards;
+}
 
-        return (
-          <div 
-            key={slide.id} 
-            className={`ss-slide ${animClass}`}
-          >
-            <slide.Component />
-          </div>
-        );
-      })}
+@keyframes ssFlipEnterRight {
+  0%   { transform: rotateY(45deg) translateZ(-150px); opacity: 0; }
+  100% { transform: rotateY(0deg)  translateZ(0);      opacity: 1; }
+}
+@keyframes ssFlipEnterLeft {
+  0%   { transform: rotateY(-45deg) translateZ(-150px); opacity: 0; }
+  100% { transform: rotateY(0deg)   translateZ(0);      opacity: 1; }
+}
+@keyframes ssFlipExitLeft {
+  0%   { transform: rotateY(0deg)   translateZ(0);      opacity: 1; }
+  100% { transform: rotateY(-45deg) translateZ(-150px); opacity: 0; }
+}
+@keyframes ssFlipExitRight {
+  0%   { transform: rotateY(0deg)  translateZ(0);      opacity: 1; }
+  100% { transform: rotateY(45deg) translateZ(-150px); opacity: 0; }
+}
 
-      {/* Navigation Zones (Overlay Side-Taps) */}
-      <div 
-        className={`ss-nav ss-nav-left ${currentIdx === 0 ? 'ss-nav-disabled' : ''}`} 
-        onClick={goPrev}
-      >
-        <div className="ss-nav-arrow">◀</div>
-      </div>
-      <div 
-        className={`ss-nav ss-nav-right ${currentIdx === slides.length - 1 ? 'ss-nav-disabled' : ''}`} 
-        onClick={goNext}
-      >
-        <div className="ss-nav-arrow">▶</div>
-      </div>
+/* ═══════════════════════════════════════════
+   NAVIGATION INTERFACES & UI
+═══════════════════════════════════════════ */
+.ss-nav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.ss-nav:hover {
+  opacity: 1;
+}
+.ss-nav-left { left: 0; }
+.ss-nav-right { right: 0; }
 
-      {/* Bottom Progress Bar */}
-      <div className="ss-progress">
-        <div 
-          className="ss-progress-fill" 
-          style={{ width: `${((currentIdx + 1) / slides.length) * 100}%` }}
-        />
-      </div>
-    </div>
-  );
-     }
+.ss-nav-arrow {
+  font-size: 2rem;
+  color: #333;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 10px 15px;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.ss-nav-disabled {
+  pointer-events: none;
+  display: none;
+}
+
+.ss-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.ss-progress-fill {
+  height: 100%;
+  background-color: #e07a5f; /* Terracotta highlight */
+  transition: width 0.3s ease-out;
+}
