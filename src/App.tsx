@@ -1,7 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { slides } from '@/slideLoader';
 import { useLocation } from 'wouter';
 import SlideShow from '@/components/SlideShow';
+
+// Helper to safely format the base URL for public assets
+const getAssetPath = (filename: string) => {
+  const base = import.meta.env.BASE_URL || '/';
+  const cleanBase = base.endsWith('/') ? base : `${base}/`;
+  return `${cleanBase}${filename}`;
+};
+
+// Foolproof sound player bound to immediate user gestures
+const playFart = () => {
+  const audio = new Audio(getAssetPath('fart.mp3'));
+  audio.volume = 0.65; // High-quality blast volume
+  audio.play().catch((err) => {
+    console.warn("Fart playback failed. Check if public/fart.mp3 exists!", err);
+  });
+};
 
 function getSlideIndex(pathname: string): number {
   const match = pathname.match(/^\/slide(\d+)$/);
@@ -26,11 +42,17 @@ function SlideEditor() {
       if (
         (event.key === 'ArrowLeft' || event.key === 'ArrowUp') &&
         currentIndex > 0
-      ) navigate(`/slide${slides[currentIndex - 1].position}`);
+      ) {
+        playFart(); // 💨 Play instantly on arrow key left!
+        navigate(`/slide${slides[currentIndex - 1].position}`);
+      }
       if (
         (event.key === 'ArrowRight' || event.key === 'ArrowDown' || event.key === ' ') &&
         currentIndex < slides.length - 1
-      ) navigate(`/slide${slides[currentIndex + 1].position}`);
+      ) {
+        playFart(); // 💨 Play instantly on arrow key right/space!
+        navigate(`/slide${slides[currentIndex + 1].position}`);
+      }
     };
 
     const INTERACTIVE =
@@ -48,8 +70,10 @@ function SlideEditor() {
         window.parent.postMessage({ type: 'advanceSlide' }, '*');
         return;
       }
-      if (currentIndex < slides.length - 1)
+      if (currentIndex < slides.length - 1) {
+        playFart(); // 💨 Play instantly on screen click!
         navigate(`/slide${slides[currentIndex + 1].position}`);
+      }
     };
 
     let touchStartX = 0, touchStartY = 0, touchTarget: EventTarget | null = null;
@@ -70,10 +94,13 @@ function SlideEditor() {
         return;
       }
       const fraction = touchStartX / window.innerWidth;
-      if (fraction < 0.4 && currentIndex > 0)
+      if (fraction < 0.4 && currentIndex > 0) {
+        playFart(); // 💨 Play instantly on mobile tap left!
         navigate(`/slide${slides[currentIndex - 1].position}`);
-      else if (fraction >= 0.4 && currentIndex < slides.length - 1)
+      } else if (fraction >= 0.4 && currentIndex < slides.length - 1) {
+        playFart(); // 💨 Play instantly on mobile tap right!
         navigate(`/slide${slides[currentIndex + 1].position}`);
+      }
     };
 
     window.addEventListener('keydown', onKeyDown);
@@ -88,7 +115,6 @@ function SlideEditor() {
     };
   }, [currentIndex, navigate]);
 
-  // SAFE GUARD: If index is invalid, render a helpful fallback instead of a white screen!
   if (currentIndex === -1) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-zinc-900 text-white p-6 text-center">
@@ -115,7 +141,6 @@ function SlideEditor() {
   );
 }
 
-// Do not rewrite this component.
 function AllSlides() {
   return (
     <div className="bg-black">
@@ -134,7 +159,6 @@ function AllSlides() {
   );
 }
 
-// Deployed view at `/` — renders the animated SlideShow directly.
 function SlideViewer() {
   return <SlideShow />;
 }
@@ -142,22 +166,7 @@ function SlideViewer() {
 export default function App() {
   const [location, navigate] = useLocation();
 
-  // Watch for slide changes and play the transition fart noise!
   useEffect(() => {
-    // Avoid playing immediately on initial render or list views
-    if (location !== '/' && location !== '/allslides') {
-      const audio = new Audio(`${import.meta.env.BASE_URL}fart.mp3`);
-      audio.volume = 0.55; // Adjust the volume (0.0 to 1.0)
-      
-      audio.play().catch((err) => {
-        // Log in console if the browser blocks play before interaction
-        console.warn("Fart audio was blocked or the file isn't in /public folder:", err);
-      });
-    }
-  }, [location]);
-
-  useEffect(() => {
-    // Log for mobile debugging
     console.log("App Location Checked:", location);
     console.log("Total Loaded Slides:", slides.length);
 
@@ -178,13 +187,15 @@ export default function App() {
         event.data?.type === 'navigateToSlide' &&
         typeof event.data.position === 'number' &&
         slides.some((s) => s.position === event.data.position)
-      ) navigate(`/slide${event.data.position}`);
+      ) {
+        playFart(); // 💨 Play sound when receiving iframe control messages!
+        navigate(`/slide${event.data.position}`);
+      }
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
   }, [navigate]);
 
-  // Handle case where slides are completely empty/unloaded
   if (slides.length === 0) {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center bg-zinc-900 text-white p-6 text-center">
@@ -197,4 +208,4 @@ export default function App() {
   if (location === '/') return <SlideViewer />;
   if (location === '/allslides') return <AllSlides />;
   return <SlideEditor />;
-}
+        }
