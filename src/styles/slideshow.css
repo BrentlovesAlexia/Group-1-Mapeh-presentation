@@ -116,11 +116,11 @@
 }
 @keyframes ssExitToTop {
   0%   { transform: translateY(0);   opacity: 1; }
-  100% { transform: translateY(-30%) opacity: 0; }
+  100% { transform: translateY(-30%); opacity: 0; }
 }
 @keyframes ssExitToBottom {
   0%   { transform: translateY(0);  opacity: 1; }
-  100% { transform: translateY(30%) opacity: 0; }
+  100% { transform: translateY(30%); opacity: 0; }
 }
 
 /* ═══════════════════════════════════════════
