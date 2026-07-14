@@ -3,20 +3,32 @@ import { slides } from '@/slideLoader';
 import { useLocation } from 'wouter';
 import SlideShow from '@/components/SlideShow';
 
-// Helper to safely format the base URL for public assets
+// Clean path helper that handles both local development and GitHub Pages perfectly
 const getAssetPath = (filename: string) => {
   const base = import.meta.env.BASE_URL || '/';
-  const cleanBase = base.endsWith('/') ? base : `${base}/`;
-  return `${cleanBase}${filename}`;
+  if (base === '/' || base === './') {
+    return filename; // Local relative path
+  }
+  const cleanBase = base.replace(/\/+$/, '');
+  return `${cleanBase}/${filename}`;
 };
 
-// Foolproof sound player bound to immediate user gestures
+// Global Audio instance. Reusing a single player is the #1 way to prevent browsers from blocking the sound.
+let fartAudio: HTMLAudioElement | null = null;
+
 const playFart = () => {
-  const audio = new Audio(getAssetPath('fart.mp3'));
-  audio.volume = 0.65; // High-quality blast volume
-  audio.play().catch((err) => {
-    console.warn("Fart playback failed. Check if public/fart.mp3 exists!", err);
-  });
+  try {
+    if (!fartAudio) {
+      fartAudio = new Audio(getAssetPath('fart.mp3'));
+    }
+    fartAudio.currentTime = 0; // Rewind to start so it plays instantly on rapid clicks
+    fartAudio.volume = 0.7;
+    fartAudio.play().catch((err) => {
+      console.warn("Fart playback failed. Ensure 'fart.mp3' is in your public/ folder!", err);
+    });
+  } catch (e) {
+    console.warn("Could not initialize audio object:", e);
+  }
 };
 
 function getSlideIndex(pathname: string): number {
@@ -43,14 +55,14 @@ function SlideEditor() {
         (event.key === 'ArrowLeft' || event.key === 'ArrowUp') &&
         currentIndex > 0
       ) {
-        playFart(); // 💨 Play instantly on arrow key left!
+        playFart(); // 💨 Play instantly
         navigate(`/slide${slides[currentIndex - 1].position}`);
       }
       if (
         (event.key === 'ArrowRight' || event.key === 'ArrowDown' || event.key === ' ') &&
         currentIndex < slides.length - 1
       ) {
-        playFart(); // 💨 Play instantly on arrow key right/space!
+        playFart(); // 💨 Play instantly
         navigate(`/slide${slides[currentIndex + 1].position}`);
       }
     };
@@ -71,7 +83,7 @@ function SlideEditor() {
         return;
       }
       if (currentIndex < slides.length - 1) {
-        playFart(); // 💨 Play instantly on screen click!
+        playFart(); // 💨 Play instantly
         navigate(`/slide${slides[currentIndex + 1].position}`);
       }
     };
@@ -83,9 +95,11 @@ function SlideEditor() {
       touchStartY = e.touches[0].clientY;
       touchTarget = e.target;
     };
+    
     const onTouchEnd = (e: TouchEvent) => {
       const dx = e.changedTouches[0].clientX - touchStartX;
       const dy = e.changedTouches[0].clientY - touchStartY;
+      // If they dragged their finger (swiped), completely ignore it
       if (Math.abs(dx) >= 10 || Math.abs(dy) >= 10) return;
       if (isInteractive(touchTarget)) return;
       touchHandledRef.current = true;
@@ -93,12 +107,14 @@ function SlideEditor() {
         window.parent.postMessage({ type: 'advanceSlide' }, '*');
         return;
       }
+      
+      // Simple tap coordinates (Left 40% goes back, Right 60% goes next)
       const fraction = touchStartX / window.innerWidth;
       if (fraction < 0.4 && currentIndex > 0) {
-        playFart(); // 💨 Play instantly on mobile tap left!
+        playFart(); // 💨 Play instantly on tap left
         navigate(`/slide${slides[currentIndex - 1].position}`);
       } else if (fraction >= 0.4 && currentIndex < slides.length - 1) {
-        playFart(); // 💨 Play instantly on mobile tap right!
+        playFart(); // 💨 Play instantly on tap right
         navigate(`/slide${slides[currentIndex + 1].position}`);
       }
     };
@@ -208,4 +224,5 @@ export default function App() {
   if (location === '/') return <SlideViewer />;
   if (location === '/allslides') return <AllSlides />;
   return <SlideEditor />;
-        }
+      }
+         
