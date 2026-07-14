@@ -102,6 +102,22 @@ function SlideEditor() {
     };
   }, [currentIndex, navigate]);
 
+  // SAFE GUARD: If index is invalid, render a helpful fallback instead of a white screen!
+  if (currentIndex === -1) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-zinc-900 text-white p-6 text-center">
+        <h2 className="text-2xl font-bold text-red-500 mb-2">Slide Not Found</h2>
+        <p className="text-zinc-400 mb-4">Current location: "{location}"</p>
+        <button 
+          onClick={() => navigate('/')} 
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm transition"
+        >
+          Go back to Home Slide
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="select-none">
       {slides.map((slide, index) => (
@@ -141,12 +157,18 @@ export default function App() {
   const [location, navigate] = useLocation();
 
   useEffect(() => {
+    // Log for mobile debugging
+    console.log("App Location Checked:", location);
+    console.log("Total Loaded Slides:", slides.length);
+
     if (
       location !== '/' &&
       location !== '/allslides' &&
       getSlideIndex(location) === -1
     ) {
-      if (slides.length > 0) navigate(`/slide${slides[0].position}`, { replace: true });
+      if (slides.length > 0) {
+        navigate(`/slide${slides[0].position}`, { replace: true });
+      }
     }
   }, [location, navigate]);
 
@@ -162,7 +184,17 @@ export default function App() {
     return () => window.removeEventListener('message', onMessage);
   }, [navigate]);
 
+  // Handle case where slides are completely empty/unloaded
+  if (slides.length === 0) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center bg-zinc-900 text-white p-6 text-center">
+        <h2 className="text-xl font-semibold mb-2 text-amber-500 animate-pulse">Loading Slides...</h2>
+        <p className="text-zinc-500 text-sm">Please wait while the presentation boots up.</p>
+      </div>
+    );
+  }
+
   if (location === '/') return <SlideViewer />;
   if (location === '/allslides') return <AllSlides />;
   return <SlideEditor />;
-            }
+          }
