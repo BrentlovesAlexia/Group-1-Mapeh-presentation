@@ -86,5 +86,13 @@
     "title": "Art Director — Explanation",
     "description": "Explains how art directors lead teams in film, advertising, and publishing to execute marketing campaigns and media designs",
     "speakerNotes": ""
+  },
+  {
+    "id": "f2a3b4c5-d6e7-8901-abcd-012345678901",
+    "position": 12,
+    "filepath": "src/pages/slides/Slide12.tsx",
+    "title": "Conclusion — Thank You",
+    "description": "Ending slide celebrating the presentation's finish, thanking the audience, and opening up for any questions.",
+    "speakerNotes": "Thank everyone for their time and open the floor to any final questions about the presentation."
   }
 ]
